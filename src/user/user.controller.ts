@@ -1,4 +1,13 @@
-import { Body, Controller, Headers, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Post,
+  Request,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import {
   Ctx,
@@ -7,13 +16,17 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { AuthenticationGuard } from 'src/guards/authentication.guard';
-// import { AuthenticationGuard } from 'src/guards/authentication.guard';
-
-//
+import { Throttle } from '@nestjs/throttler';
+import { response } from 'express';
+import { NodeMailerService } from 'src/nodeMailer/nodeMailer.service';
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly nodeMailerService: NodeMailerService,
+  ) {}
 
+  // @Throttle({ default: { limit: 3, ttl: 6000 } }) // here m overriding the limit and duration.
   @Post('sign-up')
   async signUp(@Body() body: any) {
     try {
@@ -29,18 +42,41 @@ export class UserController {
     }
   }
 
+  
+  @Get('all-users-data')
+  async callUser(){
+    try {
+      const result = this.userService.getAllUserData();
+      return result;
+    } catch (error) {
+      console.log(error.message);
+      return 'An error occurred!';
+    }
+  }
+  // @Throttle({}) // here m getting the limit by default that i have defined in rate module.
   @Post('log-in')
   async logIn(@Body() body: any) {
     const isLogin = await this.userService.login(body);
+
     if (isLogin) {
-      return { result: 'Login Successfully', token: isLogin };
+      // return { result: 'Login Successfully', token: isLogin };
+      return isLogin;
     } else {
       return 'Failed to login';
     }
   }
+
+  // @Throttle({ default: { limit: 3, ttl: 6000 } })
   @UseGuards(AuthenticationGuard)
   @Post('verify-token')
-  async tokenVerification() {}
+  async tokenVerification(@Request() req: any) {
+    // console.log("req::::::::::::",req.user);
+    const result = await this.userService.getUserData(req);
+    if (result) {
+      return result;
+    }
+    return false;
+  }
   // @Post('verify-token')
   // async tokenVerification(@Headers() header: any){
   //   console.log("header:::::::::::::",header.authorization.split(" ")[1])
@@ -58,4 +94,15 @@ export class UserController {
     }
     return data;
   }
+
+  @Post('mail-service')          
+  async sendMailer(@Body() body: any) {
+    const mail = this.nodeMailerService.sendMail(body.data);
+    return {
+      message: 'Successsss',
+      mail: mail,
+    };
+  }
+
 }
+ 

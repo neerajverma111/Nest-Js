@@ -5,6 +5,11 @@ import { RedisMod } from 'src/redis/redis.module';
 import { Helper } from './user.helper';
 import { RabbitMQModule } from 'src/rabbitMq/rabbitmq.module';
 import { JwtModule } from '@nestjs/jwt';
+import { RateModule } from 'src/rateLimiter/rate.module';
+import { NodeMailerModule } from 'src/nodeMailer/nodeMailer.module';
+import { AuthModule } from 'src/auth/auth.module';
+import { AuthController } from 'src/auth/auth.controller';
+import { GoogleAuthService } from 'src/auth/google-auth.service';
 
 @Module({
   imports: [
@@ -16,8 +21,11 @@ import { JwtModule } from '@nestjs/jwt';
     }),
     RedisMod,
     RabbitMQModule,
+    RateModule,
+    NodeMailerModule,
+    AuthModule,
   ],
-  controllers: [UserController],
+  controllers: [UserController, AuthController],
   providers: [UserService, Helper],
 })
 export class UserModule {}

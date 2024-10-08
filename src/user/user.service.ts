@@ -27,8 +27,6 @@ export class UserService {
   }
   async login(body: any) {
     try {
-      const { email, password } = body;
-
       const queryResponse: any = await this.helper.isLogin(body);
       if (queryResponse) {
         return queryResponse;
@@ -39,7 +37,23 @@ export class UserService {
   }
 
   async verifyToken(token: any) {
-    const result = await this.helper.tokenVerify(token); 
+    const result = await this.helper.tokenVerify(token);
+    return result;
+  }
+
+  async getUserData(req: any) {
+    try {
+      const result = await this.helper.getData(req.user);
+      if (result) {
+        return result;
+      }
+      return false;
+    } catch (error) {
+      console.log("error in services ", error.message);
+    }
+  }
+  async getAllUserData(){
+    const result = await this.helper.getAllUsersData();
     return result;
   }
 }

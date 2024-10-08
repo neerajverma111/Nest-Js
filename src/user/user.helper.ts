@@ -79,40 +79,29 @@ export class Helper {
   }
   async isLogin(body: any) {
     const { email, password } = body;
-    const cachedUser = await this.redis.get(`user_${email}`);
-    if (cachedUser) {
+    const result: any = await connect.query(
+      'SELECT email FROM userData WHERE email = ? && password = ?',
+      [email, password],
+    );
+    if (result[0].length > 0) {
       const user = await this.validateUser(email, password);
       console.log('user:::::', user.password);
       if (user) {
-        const payload = { email: user.email, password: user.password };
-        const token = this.jwtService.sign(payload);
-        console.log('Logging from redis');
-        // console.log(token);
+        const id = user.id.toString();
+        // console.log('idddddddddddddddddddddddddddddddd:::::', id);
+        const payload = { id, email: user.email, password: user.password };
+        const token = this.jwtService.sign(payload, { expiresIn: '1h' });
+        console.log('token::::::::::::', token);
+        const data = result[0][0];
+        await this.redis.set(`user_${email}`, JSON.stringify(data), 'EX', 600);
         return token;
       }
-    } else {
-      const result: any = await connect.query(
-        'SELECT email FROM userData WHERE email = ? && password = ?',
-        [email, password],
-      );
-      if (result[0].length > 0) {
-        const user = await this.validateUser(email, password);
-        console.log('user:::::', user.password);
-        if (user) {
-          const payload = { email: user.email, password: user.password };
-          const token = this.jwtService.sign(payload, {expiresIn: "1h"});
-          // console.log(token);
-          const data = result[0][0];
-          await this.redis.set(`user_${email}`, JSON.stringify(data), 'EX', 600);
-          return token;
-        }
-        return null;
-      } else return false;
-    }
+      return null;
+    } else return false;
   }
   async validateUser(email: string, password: string): Promise<any> {
     const [result]: any = await connect.query(
-      'SELECT email, password FROM userData WHERE email = ? && password = ?',
+      'SELECT id,email, password FROM userData WHERE email = ? && password = ?',
       [email, password],
     );
     if (result.length === 0) {
@@ -123,10 +112,34 @@ export class Helper {
     return user;
   }
 
-  async tokenVerify(token: any){
+  async tokenVerify(token: any) {
     // const key:any = process.env.SECRET_KEY;
     const result = this.jwtService.verify(token);
-    console.log("token verified>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",result);
+    console.log('token verified>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', result);
     return result;
+  }
+
+  async getData(req: any) {
+    try {
+      const { id } = req;
+      const [result]: any = await connect.query(
+        'SELECT name, email FROM userData where id =?',
+        [id],
+      );
+      return result[0];
+    } catch (error) {
+      console.log('Error in helper', error.message);
+    }
+  }
+  async getAllUsersData() {
+    try {
+      const [result]: any = await connect.query(
+        'SELECT id,name,email,password FROM userData',
+      );
+      console.log('data::::::::::::::', result);
+      return result;
+    } catch (error) {
+      console.log('Error in helper', error.message);
+    }
   }
 }
