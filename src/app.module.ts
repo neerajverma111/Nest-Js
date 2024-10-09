@@ -12,6 +12,7 @@ import { ConfigModule } from '@nestjs/config';
     RabbitMQModule,
     // ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
   ],
+  
   controllers: [],
   providers: [AppService],
 })
