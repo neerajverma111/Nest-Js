@@ -19,6 +19,7 @@ import { AuthenticationGuard } from 'src/guards/authentication.guard';
 import { Throttle } from '@nestjs/throttler';
 import { response } from 'express';
 import { NodeMailerService } from 'src/nodeMailer/nodeMailer.service';
+@Throttle({})
 @Controller('user')
 export class UserController {
   constructor(
@@ -42,9 +43,8 @@ export class UserController {
     }
   }
 
-  
   @Get('all-users-data')
-  async callUser(){
+  async callUser() {
     try {
       const result = this.userService.getAllUserData();
       return result;
@@ -53,16 +53,16 @@ export class UserController {
       return 'An error occurred!';
     }
   }
-  // @Throttle({}) // here m getting the limit by default that i have defined in rate module.
+  // @Throttle({default: {limit: 3, ttl:400}}) // here m getting the limit by default that i have defined in rate module.
   @Post('log-in')
   async logIn(@Body() body: any) {
     const isLogin = await this.userService.login(body);
 
     if (isLogin) {
       // return { result: 'Login Successfully', token: isLogin };
-      return isLogin;
+      return { message: 'Login Success!!', token: isLogin };
     } else {
-      return 'Failed to login';
+      return {message: 'Failed to login'};
     }
   }
 
@@ -95,7 +95,7 @@ export class UserController {
     return data;
   }
 
-  @Post('mail-service')          
+  @Post('mail-service')
   async sendMailer(@Body() body: any) {
     const mail = this.nodeMailerService.sendMail(body.data);
     return {
@@ -103,6 +103,4 @@ export class UserController {
       mail: mail,
     };
   }
-
 }
- 

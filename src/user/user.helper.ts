@@ -85,13 +85,10 @@ export class Helper {
     );
     if (result[0].length > 0) {
       const user = await this.validateUser(email, password);
-      console.log('user:::::', user.password);
       if (user) {
         const id = user.id.toString();
-        // console.log('idddddddddddddddddddddddddddddddd:::::', id);
         const payload = { id, email: user.email, password: user.password };
         const token = this.jwtService.sign(payload, { expiresIn: '1h' });
-        console.log('token::::::::::::', token);
         const data = result[0][0];
         await this.redis.set(`user_${email}`, JSON.stringify(data), 'EX', 600);
         return token;
@@ -113,9 +110,7 @@ export class Helper {
   }
 
   async tokenVerify(token: any) {
-    // const key:any = process.env.SECRET_KEY;
     const result = this.jwtService.verify(token);
-    console.log('token verified>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', result);
     return result;
   }
 
@@ -136,7 +131,6 @@ export class Helper {
       const [result]: any = await connect.query(
         'SELECT id,name,email,password FROM userData',
       );
-      console.log('data::::::::::::::', result);
       return result;
     } catch (error) {
       console.log('Error in helper', error.message);
