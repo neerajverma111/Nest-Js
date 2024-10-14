@@ -90,6 +90,7 @@ export class Helper {
         const id = user.id.toString();
         // console.log('idddddddddddddddddddddddddddddddd:::::', id);
         const payload = { id, email: user.email, password: user.password };
+        // console.log("payload",payload);
         const token = this.jwtService.sign(payload, { expiresIn: '1h' });
         console.log('token::::::::::::', token);
         const data = result[0][0];

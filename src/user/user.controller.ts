@@ -58,9 +58,10 @@ export class UserController {
   async logIn(@Body() body: any) {
     const isLogin = await this.userService.login(body);
 
+    console.log("::::::::",isLogin);
     if (isLogin) {
-      // return { result: 'Login Successfully', token: isLogin };
-      return isLogin;
+      return { result: 'Login Successfully', token: isLogin };
+      // return isLogin;
     } else {
       return 'Failed to login';
     }
