@@ -58,6 +58,7 @@ export class UserController {
   async logIn(@Body() body: any) {
     const isLogin = await this.userService.login(body);
 
+    console.log("::::::::",isLogin);
     if (isLogin) {
       return { result: 'Login Successfully', token: isLogin };
       // return isLogin;
@@ -106,5 +107,6 @@ export class UserController {
 
 }
 
+//sample comment from demo
 //sample comment from feature
  
