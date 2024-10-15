@@ -59,8 +59,8 @@ export class UserController {
     const isLogin = await this.userService.login(body);
 
     if (isLogin) {
-      // return { result: 'Login Successfully', token: isLogin };
-      return isLogin;
+      return { result: 'Login Successfully', token: isLogin };
+      // return isLogin;
     } else {
       return 'Failed to login';
     }
@@ -105,4 +105,6 @@ export class UserController {
   }
 
 }
+
+//sample comment
  
